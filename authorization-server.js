@@ -68,7 +68,36 @@ app.get("/authorize", (req, res) => {
 
 	const requestId = randomString()
 	requests[requestId] = req.query
-	res.end()
+	res.render("login", { client, requestId, scope: client.scope })
+})
+
+app.post("/approve", (req, res) => {
+	const { userName, password, requestId } = req.body
+	const user = users[userName]
+	if (!user) {
+		res.status(401).end()
+		return
+	}
+	if (!user.password === password) {
+		res.status(401).end()
+		return
+	}
+	const clientReq = requests[requestId]
+	if (!clientReq) {
+		res.status(401).end()
+		return
+	}
+
+	delete requests[requestId]
+
+	const authCode = randomString()
+	authorizationCodes[authCode] = { clientReq, userName }
+
+	const url = new URL(clientReq.redirect_uri)
+	url.searchParams.append("code", authCode)
+	url.searchParams.append("state", clientReq.state)
+
+	res.redirect(url)
 })
 
 const server = app.listen(config.port, "localhost", function () {
