@@ -118,6 +118,7 @@ app.post("/token", (req, res) => {
 	const obj = authorizationCodes[code]
 	if (!obj) {
 		res.status(401).end()
+		return
 	}
 	delete authorizationCodes[code]
 	const {
