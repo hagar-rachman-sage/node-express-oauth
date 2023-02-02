@@ -100,6 +100,39 @@ app.post("/approve", (req, res) => {
 	res.redirect(url)
 })
 
+app.post("/token", (req, res) => {
+	const { authorization } = req.headers
+	if (!authorization) {
+		res.status(401).end()
+		return
+	}
+
+	const { clientId, clientSecret } = decodeAuthCredentials(authorization)
+	const client = clients[clientId]
+	if (!client || client.clientSecret !== clientSecret) {
+		res.status(401).end()
+		return
+	}
+
+	const { code } = req.body
+	const obj = authorizationCodes[code]
+	if (!obj) {
+		res.status(401).end()
+	}
+	delete authorizationCodes[code]
+	const {
+		userName,
+		clientReq: { scope },
+	} = obj
+	const accessToken = jwt.sign({ userName, scope }, config.privateKey, {
+		algorithm: "RS256",
+		expiresIn: 300,
+		issuer: "http://localhost:" + config.port,
+	})
+
+	res.json({ access_token: accessToken, token_type: "Bearer" })
+})
+
 const server = app.listen(config.port, "localhost", function () {
 	console.log(`app listening on port ${config.port}`)
 	var host = server.address().address
