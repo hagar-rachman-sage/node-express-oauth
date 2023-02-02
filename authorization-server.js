@@ -50,9 +50,26 @@ app.use(timeout)
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-/*
-Your code here
-*/
+app.get("/authorize", (req, res) => {
+	const { client_id, scope } = req.query
+
+	const isValidClient = Object.keys(clients).includes(client_id)
+	if (!isValidClient) {
+		res.status(401).end()
+		return
+	}
+
+	const scopes = scope.split(" ")
+	const isValidScopes = containsAll(clients[client_id].scopes, scopes)
+	if (!isValidScopes) {
+		res.status(401).end()
+		return
+	}
+
+	const requestId = randomString()
+	requests[requestId] = req.query
+	res.end()
+})
 
 const server = app.listen(config.port, "localhost", function () {
 	var host = server.address().address
@@ -61,4 +78,9 @@ const server = app.listen(config.port, "localhost", function () {
 
 // for testing purposes
 
-module.exports = { app, requests, authorizationCodes, server }
+module.exports = {
+	app,
+	requests,
+	authorizationCodes,
+	server,
+}
