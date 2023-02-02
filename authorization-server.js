@@ -51,16 +51,16 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get("/authorize", (req, res) => {
-	const { client_id, scope } = req.query
+	const { client_id: clientId, scope } = req.query
+	const client = clients[clientId]
 
-	const isValidClient = Object.keys(clients).includes(client_id)
-	if (!isValidClient) {
+	if (!client) {
 		res.status(401).end()
 		return
 	}
 
 	const scopes = scope.split(" ")
-	const isValidScopes = containsAll(clients[client_id].scopes, scopes)
+	const isValidScopes = containsAll(client.scopes, scopes)
 	if (!isValidScopes) {
 		res.status(401).end()
 		return
@@ -72,6 +72,7 @@ app.get("/authorize", (req, res) => {
 })
 
 const server = app.listen(config.port, "localhost", function () {
+	console.log(`app listening on port ${config.port}`)
 	var host = server.address().address
 	var port = server.address().port
 })
