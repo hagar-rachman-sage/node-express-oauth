@@ -2,7 +2,7 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const fs = require("fs")
 const { timeout } = require("./utils")
-const jwn = require("jsonwebtoken")
+const jwt = require("jsonwebtoken")
 
 const config = {
 	port: 9002,
