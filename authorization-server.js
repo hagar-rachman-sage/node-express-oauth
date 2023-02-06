@@ -135,7 +135,6 @@ app.post("/token", (req, res) => {
 })
 
 const server = app.listen(config.port, "localhost", function () {
-	console.log(`app listening on port ${config.port}`)
 	var host = server.address().address
 	var port = server.address().port
 })
