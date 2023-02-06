@@ -1,0 +1,8 @@
+{
+	"prettier.htmlWhitespaceSensitivity": "ignore",
+	"prettier.printWidth": 80,
+	"prettier.semi": false,
+	"prettier.tabWidth": 4,
+	"prettier.trailingComma": "es5",
+	"prettier.useTabs": true
+}
