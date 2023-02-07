@@ -37,27 +37,42 @@ app.get("/authorize", (req, res) => {
 	res.redirect(url.format(redirectUrl))
 })
 
-app.get("/callback", (req, res) => {
+app.get("/callback", async (req, res) => {
 	if (req.query.state !== state) {
 		res.status(403).end()
 		return
 	}
 
 	const { code } = req.query
-	axios({
-		method: "POST",
-		url: config.tokenEndpoint,
-		auth: {
-			username: config.clientId,
-			password: config.clientSecret,
-		},
-		data: {
-			code,
-		},
-		validateStatus: null,
-	}).then((response) => {
-		res.end()
-	})
+
+	try {
+		let response = await axios({
+			method: "POST",
+			url: config.tokenEndpoint,
+			auth: {
+				username: config.clientId,
+				password: config.clientSecret,
+			},
+			data: {
+				code,
+			},
+			validateStatus: null,
+		})
+		const { access_token } = response.data
+
+		response = await axios({
+			method: "GET",
+			url: config.userInfoEndpoint,
+			headers: {
+				authorization: `bearer ${access_token}`,
+			},
+		})
+
+		res.render("welcome", { user: response.data })
+	} catch (err) {
+		console.error(err)
+		res.status(500).end()
+	}
 })
 
 const server = app.listen(config.port, "localhost", function () {
